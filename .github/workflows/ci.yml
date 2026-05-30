@@ -1,0 +1,20 @@
+name: ci
+
+# Build + test on every push/PR so there's a visible CI status (catches regressions and
+# surfaces a CI signal to registries like Glama). Live tests skip without FORGE_API_KEY.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
