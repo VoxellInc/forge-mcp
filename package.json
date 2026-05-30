@@ -1,10 +1,10 @@
 {
   "name": "@voxell/forge-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for Forge — Voxell's GA text-embedding API. Exposes embed + list_models tools to any MCP client.",
   "mcpName": "ai.voxell/forge",
   "type": "module",
-  "bin": { "forge-mcp": "dist/index.js" },
+  "bin": { "forge-mcp": "dist/cli.js" },
   "files": ["dist"],
   "scripts": {
     "build": "tsc",

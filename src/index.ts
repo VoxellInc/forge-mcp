@@ -1,9 +1,8 @@
-#!/usr/bin/env node
 // Forge MCP server — exposes Voxell's GA embedding API as MCP tools (embed, list_models)
 // over stdio. The developer supplies FORGE_API_KEY; no Voxell infra is involved.
+// The bin entrypoint is cli.ts (it calls main()); this file stays a pure importable module.
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { ForgeClient, FORGE_MODELS } from "./forge.js";
 
@@ -99,7 +98,7 @@ export function buildServer(client: ForgeClient): McpServer {
   return server;
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const apiKey = process.env.FORGE_API_KEY;
   if (!apiKey) {
     console.error("forge-mcp: FORGE_API_KEY is required (get one at https://voxell.ai).");
@@ -112,10 +111,5 @@ async function main(): Promise<void> {
   console.error(`forge-mcp ${SERVER_VERSION} running on stdio (base=${baseUrl})`);
 }
 
-// Only run the server when executed directly (not when imported by tests).
-if (process.argv[1] && process.argv[1] === fileURLToPath(import.meta.url)) {
-  main().catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
-}
+// (No is-main guard here — the bin is cli.ts, which calls main() unconditionally. A guard
+// based on argv[1]===import.meta.url silently fails under symlinked bins and would no-op npx.)
