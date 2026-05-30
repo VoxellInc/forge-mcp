@@ -1,0 +1,29 @@
+{
+  "name": "@voxell/forge-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Forge — Voxell's GA text-embedding API. Exposes embed + list_models tools to any MCP client.",
+  "mcpName": "ai.voxell/forge",
+  "type": "module",
+  "bin": { "forge-mcp": "dist/index.js" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test test/*.test.ts",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["mcp", "embeddings", "forge", "voxell", "rag", "vector"],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/VoxellInc/forge-mcp.git" },
+  "homepage": "https://github.com/VoxellInc/forge-mcp#readme",
+  "bugs": "https://github.com/VoxellInc/forge-mcp/issues",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "tsx": "^4.19.0",
+    "@types/node": "^20.14.0"
+  }
+}

@@ -1,0 +1,121 @@
+#!/usr/bin/env node
+// Forge MCP server — exposes Voxell's GA embedding API as MCP tools (embed, list_models)
+// over stdio. The developer supplies FORGE_API_KEY; no Voxell infra is involved.
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { fileURLToPath } from "node:url";
+import { z } from "zod";
+import { ForgeClient, FORGE_MODELS } from "./forge.js";
+
+export const SERVER_NAME = "forge";
+export const SERVER_VERSION = "0.1.0";
+
+/** Build the MCP server bound to a Forge client. Exported so tests can drive it
+ *  over an in-memory transport with a real client. */
+export function buildServer(client: ForgeClient): McpServer {
+  const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION });
+
+  server.registerTool(
+    "embed",
+    {
+      title: "Embed text with Forge",
+      description:
+        "Generate vector embeddings for one or more texts using Voxell Forge (a GA, " +
+        "high-quality embedding API). Use input_type='query' for search queries and " +
+        "'document' for content you will store/index.",
+      inputSchema: {
+        input: z
+          .union([z.string(), z.array(z.string())])
+          .describe("A text, or array of texts, to embed."),
+        model: z
+          .string()
+          .optional()
+          .describe("Model: turbo (1024d, default), pro (2560d), or ultra (4096d)."),
+        dim: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("Truncate vectors to this dimension (Matryoshka); omit for model default."),
+        input_type: z
+          .enum(["query", "document"])
+          .optional()
+          .describe("'query' applies a retrieval prefix; 'document' is raw. Default 'document'."),
+      },
+      outputSchema: {
+        model: z.string(),
+        dim: z.number(),
+        count: z.number(),
+        tokens: z.number(),
+        embeddings: z.array(z.array(z.number())),
+      },
+    },
+    async (args) => {
+      const r = await client.embed(args);
+      const structuredContent = {
+        model: r.model,
+        dim: r.dim,
+        count: r.embeddings.length,
+        tokens: r.tokens,
+        embeddings: r.embeddings,
+      };
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Embedded ${r.embeddings.length} text(s) → ${r.dim}-dim vectors (model=${r.model}, tokens=${r.tokens}, ${r.latency_ms}ms).`,
+          },
+        ],
+        structuredContent,
+      };
+    },
+  );
+
+  server.registerTool(
+    "list_models",
+    {
+      title: "List Forge embedding models",
+      description: "List the available Forge embedding models and their native dimensions.",
+      inputSchema: {},
+      outputSchema: {
+        models: z.array(
+          z.object({ id: z.string(), dim: z.number(), default: z.boolean() }),
+        ),
+      },
+    },
+    async () => ({
+      content: [
+        {
+          type: "text",
+          text: FORGE_MODELS.map(
+            (m) => `${m.id} (${m.dim}d)${m.default ? " [default]" : ""}`,
+          ).join("\n"),
+        },
+      ],
+      structuredContent: { models: FORGE_MODELS },
+    }),
+  );
+
+  return server;
+}
+
+async function main(): Promise<void> {
+  const apiKey = process.env.FORGE_API_KEY;
+  if (!apiKey) {
+    console.error("forge-mcp: FORGE_API_KEY is required (get one at https://voxell.ai).");
+    process.exit(1);
+  }
+  const baseUrl = process.env.FORGE_BASE_URL || "https://api.voxell.ai";
+  const client = new ForgeClient({ apiKey, baseUrl });
+  const server = buildServer(client);
+  await server.connect(new StdioServerTransport());
+  console.error(`forge-mcp ${SERVER_VERSION} running on stdio (base=${baseUrl})`);
+}
+
+// Only run the server when executed directly (not when imported by tests).
+if (process.argv[1] && process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}
