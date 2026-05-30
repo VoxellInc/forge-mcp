@@ -7,7 +7,7 @@ import { z } from "zod";
 import { ForgeClient, FORGE_MODELS } from "./forge.js";
 
 export const SERVER_NAME = "forge";
-export const SERVER_VERSION = "0.1.4";
+export const SERVER_VERSION = "0.1.5";
 
 /** Build the MCP server bound to a Forge client. Exported so tests can drive it
  *  over an in-memory transport with a real client. */
@@ -23,7 +23,7 @@ export function buildServer(client: ForgeClient): McpServer {
         "API). Use it to turn text into vectors for semantic search, RAG, clustering, or " +
         "similarity. Set input_type='query' for search queries and 'document' for content you " +
         "index. Choose model by quality/cost: turbo (1024d, fast, default) -> pro (2560d) -> ultra " +
-        "(4096d, top-ranked on MTEB). Optionally set dim to truncate (Matryoshka, re-normalized).",
+        "(4096d, #4 on MTEB English, top usable). Optionally set dim to truncate (Matryoshka, re-normalized).",
       inputSchema: {
         input: z
           .union([z.string(), z.array(z.string())])
@@ -31,7 +31,7 @@ export function buildServer(client: ForgeClient): McpServer {
         model: z
           .string()
           .optional()
-          .describe("Model by quality/cost: turbo (1024d, fast, default), pro (2560d), ultra (4096d, top-ranked on MTEB)."),
+          .describe("Model by quality/cost: turbo (1024d, fast, default), pro (2560d), ultra (4096d, #4 on MTEB English, top usable)."),
         dim: z
           .number()
           .int()

@@ -12,9 +12,10 @@ It does embeddings only — no storage, no search, no RAG. Those are different p
 
 ## Why Forge
 
-- **Quality you can dial.** Forge runs the Qwen3-Embedding family; `ultra` is the 8B — a
-  top-ranked model on the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard)
-  (#1 multilingual at release). `turbo` (0.6B) is the fast/cheap default. Pick your quality/cost point.
+- **Quality you can dial.** Forge runs the Qwen3-Embedding family; `ultra` is the 8B — ~75+
+  average task score on MTEB, currently #4 on MTEB (English), and the top *usable* model (the
+  three ranked above it are research-only). `turbo` (0.6B) is the fast/cheap default. Pick your
+  quality/cost point.
 - **Matryoshka (MRL).** Set `dim` to truncate (re-normalized) for ~4× smaller, cheaper vectors.
 - **Low latency** (Go + CUDA engine), **zero-trust** (per-key auth; mTLS available), and **free to
   start** (10M tokens, no card — [dash.voxell.ai](https://dash.voxell.ai); more at

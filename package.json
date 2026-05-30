@@ -1,7 +1,7 @@
 {
   "name": "@voxell/forge-mcp",
-  "version": "0.1.4",
-  "description": "MCP server for Forge — Voxell's GA text-embedding API. Exposes embed + list_models tools to any MCP client.",
+  "version": "0.1.5",
+  "description": "MCP server for Forge — Voxell's text-embedding API (turbo→ultra; ultra = Qwen3-Embedding-8B, ~75+ avg MTEB). embed + list_models for semantic search & RAG.",
   "mcpName": "ai.voxell/forge",
   "type": "module",
   "bin": {
