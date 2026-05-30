@@ -7,7 +7,7 @@ import { z } from "zod";
 import { ForgeClient, FORGE_MODELS } from "./forge.js";
 
 export const SERVER_NAME = "forge";
-export const SERVER_VERSION = "0.1.3";
+export const SERVER_VERSION = "0.1.4";
 
 /** Build the MCP server bound to a Forge client. Exported so tests can drive it
  *  over an in-memory transport with a real client. */
@@ -19,9 +19,11 @@ export function buildServer(client: ForgeClient): McpServer {
     {
       title: "Embed text with Forge",
       description:
-        "Generate vector embeddings for one or more texts using Voxell Forge (a GA, " +
-        "high-quality embedding API). Use input_type='query' for search queries and " +
-        "'document' for content you will store/index.",
+        "Generate vector embeddings for one or more texts with Forge (Voxell's hosted embedding " +
+        "API). Use it to turn text into vectors for semantic search, RAG, clustering, or " +
+        "similarity. Set input_type='query' for search queries and 'document' for content you " +
+        "index. Choose model by quality/cost: turbo (1024d, fast, default) -> pro (2560d) -> ultra " +
+        "(4096d, top-ranked on MTEB). Optionally set dim to truncate (Matryoshka, re-normalized).",
       inputSchema: {
         input: z
           .union([z.string(), z.array(z.string())])
@@ -29,13 +31,13 @@ export function buildServer(client: ForgeClient): McpServer {
         model: z
           .string()
           .optional()
-          .describe("Model: turbo (1024d, default), pro (2560d), or ultra (4096d)."),
+          .describe("Model by quality/cost: turbo (1024d, fast, default), pro (2560d), ultra (4096d, top-ranked on MTEB)."),
         dim: z
           .number()
           .int()
           .positive()
           .optional()
-          .describe("Truncate vectors to this dimension (Matryoshka); omit for model default."),
+          .describe("Truncate to N dimensions (Matryoshka, re-normalized) — fewer dims = smaller, cheaper vectors. Omit for the model's native size."),
         input_type: z
           .enum(["query", "document"])
           .optional()
@@ -74,7 +76,7 @@ export function buildServer(client: ForgeClient): McpServer {
     "list_models",
     {
       title: "List Forge embedding models",
-      description: "List the available Forge embedding models and their native dimensions.",
+      description: "List the available Forge embedding models and their dimensions. Call this to pick a model before embedding.",
       inputSchema: {},
       outputSchema: {
         models: z.array(

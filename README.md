@@ -10,6 +10,16 @@ You bring a Forge API key. The server is stateless, and **Voxell does not store 
 send or the vectors it returns** — only usage metadata (token counts) is recorded, for billing.
 It does embeddings only — no storage, no search, no RAG. Those are different products.
 
+## Why Forge
+
+- **Quality you can dial.** Forge runs the Qwen3-Embedding family; `ultra` is the 8B — a
+  top-ranked model on the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard)
+  (#1 multilingual at release). `turbo` (0.6B) is the fast/cheap default. Pick your quality/cost point.
+- **Matryoshka (MRL).** Set `dim` to truncate (re-normalized) for ~4× smaller, cheaper vectors.
+- **Low latency** (Go + CUDA engine), **zero-trust** (per-key auth; mTLS available), and **free to
+  start** (10M tokens, no card — [dash.voxell.ai](https://dash.voxell.ai); more at
+  [voxell.ai/forge](https://voxell.ai/forge)).
+
 ## What you can do with it
 
 - **Add semantic search** — embed your documents with `input_type: "document"` and each query
