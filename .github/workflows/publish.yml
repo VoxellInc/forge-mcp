@@ -1,0 +1,28 @@
+name: publish
+
+# Publishes @voxell/forge-mcp to npm via Trusted Publishing (OIDC) — no token/secret.
+# Fires when a GitHub Release is published. Requires the npm Trusted Publisher to be
+# configured first (npmjs.com → package → Settings → Trusted Publisher), which in turn
+# requires the package to already exist (one-time bootstrap publish).
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # OIDC token for trusted publishing
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'            # >= 22.14 required for trusted publishing
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest   # trusted publishing needs npm >= 11.5.1
+      - run: npm ci
+      - run: npm test
+      - run: npm publish --provenance
