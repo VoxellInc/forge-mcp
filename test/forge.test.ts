@@ -1,7 +1,7 @@
 // Pure-logic unit tests — no network. Exercise the request/response helpers directly.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { normalizeTexts, buildEmbedBody, parseEmbedResponse } from "../src/forge.js";
+import { normalizeTexts, buildEmbedBody, parseEmbedResponse, ForgeClient, ForgeError } from "../src/forge.js";
 
 test("normalizeTexts: string → single-element array", () => {
   assert.deepEqual(normalizeTexts("hello"), ["hello"]);
@@ -74,4 +74,12 @@ test("parseEmbedResponse: empty embeddings throws", () => {
 
 test("parseEmbedResponse: infers dim from vector length when absent", () => {
   assert.equal(parseEmbedResponse({ embeddings: [[1, 2, 3]] }).dim, 3);
+});
+
+test("ForgeClient.embed throws ForgeError(401) when no API key is set (deferred auth)", async () => {
+  const c = new ForgeClient({ apiKey: "", baseUrl: "https://api.voxell.ai" });
+  await assert.rejects(
+    () => c.embed({ input: "x" }),
+    (e: unknown) => e instanceof ForgeError && e.status === 401,
+  );
 });

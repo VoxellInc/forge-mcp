@@ -7,7 +7,7 @@ import { z } from "zod";
 import { ForgeClient, FORGE_MODELS } from "./forge.js";
 
 export const SERVER_NAME = "forge";
-export const SERVER_VERSION = "0.1.0";
+export const SERVER_VERSION = "0.1.3";
 
 /** Build the MCP server bound to a Forge client. Exported so tests can drive it
  *  over an in-memory transport with a real client. */
@@ -99,12 +99,15 @@ export function buildServer(client: ForgeClient): McpServer {
 }
 
 export async function main(): Promise<void> {
-  const apiKey = process.env.FORGE_API_KEY;
-  if (!apiKey) {
-    console.error("forge-mcp: FORGE_API_KEY is required (get one at https://voxell.ai).");
-    process.exit(1);
-  }
+  const apiKey = process.env.FORGE_API_KEY ?? "";
   const baseUrl = process.env.FORGE_BASE_URL || "https://api.voxell.ai";
+  if (!apiKey) {
+    // Don't exit — start anyway so the server is introspectable (tools/list, list_models,
+    // and registry/Glama checks work without a key). `embed` returns a clear error until set.
+    console.error(
+      "forge-mcp: FORGE_API_KEY not set — tools are listed, but `embed` will error until you provide it. Get a key at https://dash.voxell.ai",
+    );
+  }
   const client = new ForgeClient({ apiKey, baseUrl });
   const server = buildServer(client);
   await server.connect(new StdioServerTransport());

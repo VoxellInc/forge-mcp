@@ -8,7 +8,6 @@ import { existsSync, mkdtempSync, symlinkSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
-import { execFile } from "node:child_process";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
@@ -26,17 +25,23 @@ function linkToBin(): string {
   return link;
 }
 
-// No key needed: proves main() actually RUNS when launched via a symlink. With the old
-// is-main guard this exited 0 silently; correct behavior is exit 1 + the required-key message.
-test("stdio(symlink): main() runs via a symlinked bin (no-key guard regression)", { skip: builtSkip }, async () => {
+// No key needed: proves the symlinked bin (a) runs main() (the is-main-guard regression) AND
+// (b) starts WITHOUT a key and answers tools/list — exactly what registries/Glama introspect.
+test("stdio(symlink): starts keyless and serves tools/list (introspection)", { skip: builtSkip }, async () => {
   const link = linkToBin();
-  const { code, stderr } = await new Promise<{ code: number | null; stderr: string }>((resolve) => {
-    const child = execFile(process.execPath, [link], { env: { PATH: process.env.PATH ?? "" } },
-      (err, _stdout, stderr) => resolve({ code: err ? (err as any).code ?? 1 : 0, stderr }));
-    child.on("close", () => {});
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [link],
+    env: { PATH: process.env.PATH ?? "" }, // deliberately NO FORGE_API_KEY
   });
-  assert.equal(code, 1, "expected exit 1 when FORGE_API_KEY is unset");
-  assert.match(stderr, /FORGE_API_KEY is required/, "expected the required-key message (main ran)");
+  const client = new Client({ name: "forge-mcp-introspect", version: "0" });
+  await client.connect(transport);
+  try {
+    const tools = await client.listTools();
+    assert.deepEqual(tools.tools.map((t) => t.name).sort(), ["embed", "list_models"]);
+  } finally {
+    await client.close();
+  }
 });
 
 // Full MCP round-trip through the symlinked bin + real Forge call. Gated on a key.

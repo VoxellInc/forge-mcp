@@ -114,6 +114,11 @@ export class ForgeClient {
   }
 
   async embed(args: EmbedArgs): Promise<EmbedResponse> {
+    if (!this.apiKey) {
+      // Deferred to call time so the server is introspectable without a key (tools/list,
+      // list_models, and registry/Glama checks all work credential-free).
+      throw new ForgeError("FORGE_API_KEY is not set — provide it to call embed (get one at https://dash.voxell.ai)", 401);
+    }
     const body = buildEmbedBody(args);
     const res = await this.fetchImpl(`${this.baseUrl}/v1/embed`, {
       method: "POST",
