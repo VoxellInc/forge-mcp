@@ -104,31 +104,31 @@ Lists the available models and their dimensions.
 
 ## Beyond MCP: OpenAI-compatible API
 
-Not using an MCP client? Forge also speaks the **OpenAI embeddings API**. If you already
-call OpenAI for embeddings, point the base URL at Forge and switch the model — nothing else
-changes:
+Forge speaks the **OpenAI embeddings API**. Point any OpenAI client at Forge — **no code change**,
+and your existing vector dimensions are preserved:
 
 ```python
 from openai import OpenAI
 
 client = OpenAI(base_url="https://api.voxell.ai/v1", api_key="your-forge-key")
-client.embeddings.create(model="ultra", input=["hello world"])  # turbo | pro | ultra
+# the exact call you already make — now on a higher-ranked engine:
+client.embeddings.create(model="text-embedding-3-large", input=["hello world"])  # -> 3072-d
 ```
 
-```bash
-curl https://api.voxell.ai/v1/embeddings \
-  -H "Authorization: Bearer $FORGE_API_KEY" \
-  -d '{"input": "hello world", "model": "ultra", "dimensions": 256}'
-```
+Your OpenAI model names map to a **matching-dimension** Forge tier (`text-embedding-3-small`/
+`ada-002` → 1536-d, `text-embedding-3-large` → 3072-d), so existing vector stores slot in
+unchanged. Or address Forge tiers directly — `turbo` | `pro` | `ultra`. Also supports `dimensions`
+(Matryoshka, re-normalized) and `encoding_format: "base64"`.
 
-Supports `dimensions` (Matryoshka truncation, re-normalized) and `encoding_format: "base64"`.
+**It's an upgrade on every path.** Forge's *smallest* tier (`turbo`, Qwen3-Embedding-0.6B)
+outranks OpenAI's *largest* embedding model (`text-embedding-3-large`) on MTEB — so there's no
+drop-in that lands worse. `ultra` (Qwen3-Embedding-8B, ~75+ average task score, #4 on MTEB English)
+is a different league.
 
-**Why switch?** Embedding is a one-way door. Whatever distinctions your encoder throws away at
-write time are gone — no reranker, longer prompt, or bigger LLM downstream reconstructs
-information the vectors never captured. The model you embed with sets the ceiling on everything
-you build on top of it. Forge's `ultra` tier is Qwen3-Embedding-8B (~75+ average task score on
-MTEB, currently #4 on MTEB English — the top *usable* model). Switching `model` to `ultra`
-raises that ceiling with zero new plumbing.
+**Why re-embedding onto Forge is worth it.** Embedding is a one-way door: whatever an encoder
+discards at write time is gone — no reranker, longer prompt, or bigger LLM downstream reconstructs
+what the vectors never captured. The model you embed with sets the ceiling on everything above it.
+Re-embed once onto a higher-ranked engine and that ceiling rises — permanently.
 
 ## License
 
