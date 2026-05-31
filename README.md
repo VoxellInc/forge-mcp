@@ -10,6 +10,23 @@ You bring a Forge API key. The server is stateless, and **Voxell does not store 
 send or the vectors it returns** — only usage metadata (token counts) is recorded, for billing.
 It does embeddings only — no storage, no search, no RAG. Those are different products.
 
+## Quick install
+
+One-click install in your editor (then replace `your-key-here` with a real key from
+[dash.voxell.ai](https://dash.voxell.ai)):
+
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](cursor://anysphere.cursor-deeplink/mcp/install?name=forge&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkB2b3hlbGwvZm9yZ2UtbWNwIl0sImVudiI6eyJGT1JHRV9BUElfS0VZIjoieW91ci1rZXktaGVyZSJ9fQ==)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](vscode:mcp/install?%7B%22name%22%3A%22forge%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40voxell%2Fforge-mcp%22%5D%2C%22env%22%3A%7B%22FORGE_API_KEY%22%3A%22your-key-here%22%7D%7D)
+
+**Claude Code** — one command:
+
+```bash
+claude mcp add forge -e FORGE_API_KEY=your-key-here -- npx -y @voxell/forge-mcp
+```
+
+Any other client (Claude Desktop, Cline, Windsurf, Zed, …) uses the standard `mcpServers`
+block — see [Use it](#use-it) below.
+
 ## Why Forge
 
 - **Quality you can dial.** Forge runs the Qwen3-Embedding family; `ultra` is the 8B — ~75+
