@@ -102,6 +102,34 @@ Lists the available models and their dimensions.
 | `FORGE_API_KEY` | yes | — |
 | `FORGE_BASE_URL` | no | `https://api.voxell.ai` |
 
+## Beyond MCP: OpenAI-compatible API
+
+Not using an MCP client? Forge also speaks the **OpenAI embeddings API**. If you already
+call OpenAI for embeddings, point the base URL at Forge and switch the model — nothing else
+changes:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(base_url="https://api.voxell.ai/v1", api_key="your-forge-key")
+client.embeddings.create(model="ultra", input=["hello world"])  # turbo | pro | ultra
+```
+
+```bash
+curl https://api.voxell.ai/v1/embeddings \
+  -H "Authorization: Bearer $FORGE_API_KEY" \
+  -d '{"input": "hello world", "model": "ultra", "dimensions": 256}'
+```
+
+Supports `dimensions` (Matryoshka truncation, re-normalized) and `encoding_format: "base64"`.
+
+**Why switch?** Embedding is a one-way door. Whatever distinctions your encoder throws away at
+write time are gone — no reranker, longer prompt, or bigger LLM downstream reconstructs
+information the vectors never captured. The model you embed with sets the ceiling on everything
+you build on top of it. Forge's `ultra` tier is Qwen3-Embedding-8B (~75+ average task score on
+MTEB, currently #4 on MTEB English — the top *usable* model). Switching `model` to `ultra`
+raises that ceiling with zero new plumbing.
+
 ## License
 
 MIT © Voxell, Inc.
