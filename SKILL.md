@@ -1,6 +1,7 @@
 ---
 name: forge-embeddings
 description: Turn text into embedding vectors with Forge (Voxell's hosted embedding API) for semantic search, RAG retrieval, clustering, dedup, or similarity. Use when the user wants to embed text/documents/queries, build or query a vector index, find similar or duplicate text, or pick an embedding model and dimension. Provides the `embed` and `list_models` MCP tools.
+license: MIT
 ---
 
 # Forge embeddings
